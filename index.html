@@ -3,31 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IBONARIUM · SOLAR TENSION · EXP</title>
-
-<!--
-IBONARIUM · SOLAR TENSION
-Довготривалий експеримент
-
-МЕТА:
-Перевірити, чи може реальне Сонце впливати
-на сприйняття цифрового простору,
-не будучи показаним напряму.
-
-ПОЧАТОК: зараз
-КОНТРОЛЬНА ДАТА: 13 грудня
-
-ДАНІ:
-NOAA / SWPC
-Solar Wind
-X-ray Flux
-F10.7 Index
-
-ПРАВИЛО:
-Жодних чисел.
-Жодних пояснень.
-Лише вплив.
--->
+<title>IBONARIUM · SOLAR TENSION · COMPACT</title>
 
 <style>
 html,body{
@@ -35,47 +11,42 @@ html,body{
   width:100%;
   height:100%;
   background:#04060a;
-  overflow:hidden;
   font-family: monospace;
   color:#9fb3ff;
 }
 
-/* ПОЛЕ */
-#field{
-  position:absolute;
-  inset:0;
-  background:
-    radial-gradient(circle at 25% 50%, rgba(60,90,140,0.15), transparent 65%),
-    radial-gradient(circle at 75% 50%, rgba(140,60,100,0.12), transparent 65%);
-  transition: filter 2s linear;
+/* ЛАБОРАТОРНИЙ БЛОК */
+#lab{
+  position:fixed;
+  top:12px;
+  left:12px;
+  width:420px;
+  height:260px;
+  border:1px solid rgba(120,150,255,0.2);
+  background:rgba(6,8,14,0.85);
+  padding:10px;
+  box-sizing:border-box;
 }
 
-/* ПРИЧИНА */
+/* АНІМАЦІЯ 1 — ПРИЧИНА */
 #cause{
-  position:absolute;
-  left:0;
-  top:0;
-  width:38vw;
-  height:100vh;
-  padding:24px;
-  box-sizing:border-box;
+  height:40px;
+  overflow:hidden;
 }
 
 .line{
   height:1px;
-  margin:22px 0;
+  margin:6px 0;
   background:linear-gradient(90deg, transparent, #7aa2ff, transparent);
   transform-origin:left;
   opacity:0.6;
 }
 
-/* НАСЛІДОК */
+/* АНІМАЦІЯ 2 — НАСЛІДОК */
 #effect{
-  position:absolute;
-  right:0;
-  top:0;
-  width:62vw;
-  height:100vh;
+  margin-top:8px;
+  height:120px;
+  border:1px solid rgba(120,150,255,0.15);
 }
 
 canvas{
@@ -84,36 +55,42 @@ canvas{
   display:block;
 }
 
-/* ПІДПИС */
-#signature{
-  position:absolute;
-  bottom:10px;
-  left:20px;
-  font-size:11px;
-  opacity:0.35;
-  letter-spacing:1px;
+/* ТЕКСТ */
+#text{
+  margin-top:8px;
+  font-size:10px;
+  line-height:1.35;
+  opacity:0.7;
 }
 </style>
 </head>
 
 <body>
 
-<div id="field"></div>
+<div id="lab">
 
-<div id="cause">
-  <div class="line"></div>
-  <div class="line"></div>
-  <div class="line"></div>
-  <div class="line"></div>
-  <div class="line"></div>
-</div>
+  <!-- ПРИЧИНА -->
+  <div id="cause">
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+  </div>
 
-<div id="effect">
-  <canvas id="cosmos"></canvas>
-</div>
+  <!-- НАСЛІДОК -->
+  <div id="effect">
+    <canvas id="cosmos"></canvas>
+  </div>
 
-<div id="signature">
-IBONARIUM · SOLAR TENSION · Observation until 13 December
+  <!-- ОПИС -->
+  <div id="text">
+    IBONARIUM · SOLAR TENSION<br>
+    Довготривалий експеримент спостереження.<br>
+    Реальні сонячні процеси впливають на поле,<br>
+    не будучи показаними напряму.<br>
+    <br>
+    Період спостереження — до 13 грудня.
+  </div>
+
 </div>
 
 <script>
@@ -125,7 +102,6 @@ function resize(){
   w = canvas.width = canvas.clientWidth;
   h = canvas.height = canvas.clientHeight;
 }
-window.addEventListener("resize",resize);
 resize();
 
 /* СТАН СОНЦЯ */
@@ -137,21 +113,21 @@ let solar = {
 
 /* ЧАСТИНКИ */
 const parts=[];
-for(let i=0;i<420;i++){
+for(let i=0;i<120;i++){
   parts.push({
     a: Math.random()*Math.PI*2,
-    r: Math.random()*220+30,
-    v: Math.random()*0.25+0.04
+    r: Math.random()*40+10,
+    v: Math.random()*0.2+0.05
   });
 }
 
 let time=0;
 
-/* ВІЗУАЛЬНА СУТНІСТЬ */
+/* НАСЛІДОК */
 function render(){
   time += 0.002*(1+solar.xray);
 
-  ctx.fillStyle="rgba(4,6,10,0.18)";
+  ctx.fillStyle="rgba(6,8,14,0.25)";
   ctx.fillRect(0,0,w,h);
 
   ctx.save();
@@ -163,8 +139,8 @@ function render(){
     const x = Math.cos(p.a+time)*rr;
     const y = Math.sin(p.a+time)*rr;
 
-    ctx.fillStyle = `rgba(${100+solar.f107},${70},${180},0.65)`;
-    ctx.fillRect(x,y,1.6,1.6);
+    ctx.fillStyle = `rgba(${100+solar.f107},${70},${180},0.7)`;
+    ctx.fillRect(x,y,1.2,1.2);
   });
 
   ctx.restore();
@@ -172,21 +148,18 @@ function render(){
 }
 render();
 
-/* ДЕФОРМАЦІЯ ПОЛЯ */
+/* ПРИЧИНА */
 const lines = document.querySelectorAll(".line");
 function deform(){
   lines.forEach(l=>{
-    const scale = 1 + (solar.wind/900) + solar.xray*0.35;
-    const rot = (solar.f107-70)/18;
+    const scale = 1 + (solar.wind/1000) + solar.xray*0.3;
+    const rot = (solar.f107-70)/25;
     l.style.transform = `scaleX(${scale}) rotate(${rot}deg)`;
   });
-
-  document.getElementById("field").style.filter =
-    `blur(${solar.xray*2.2}px)`;
 }
 setInterval(deform,3000);
 
-/* NOAA DATA */
+/* NOAA */
 /* Сонячний вітер */
 fetch("https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json")
 .then(r=>r.json())
